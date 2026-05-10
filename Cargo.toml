@@ -1,0 +1,29 @@
+[workspace]
+members = [
+    ".",
+    "crates/alchimera_core",
+    "crates/alchimera_generation",
+    "crates/alchimera_game",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://example.invalid/alchimera"
+
+[workspace.dependencies]
+alchimera_core = { path = "crates/alchimera_core" }
+alchimera_generation = { path = "crates/alchimera_generation" }
+alchimera_game = { path = "crates/alchimera_game" }
+bevy = { version = "0.15", default-features = false }
+
+[package]
+name = "alchimera"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+alchimera_game.workspace = true
