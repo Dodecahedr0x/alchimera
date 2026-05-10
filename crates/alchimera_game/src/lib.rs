@@ -2,6 +2,13 @@
 
 use bevy::prelude::{App, MinimalPlugins};
 
+pub mod diagnostics;
+pub mod objects;
+pub mod player;
+pub mod states;
+pub mod ui;
+pub mod world;
+
 /// Stable crate identifier used by bootstrap smoke tests.
 pub const CRATE_NAME: &str = "alchimera_game";
 
@@ -44,5 +51,11 @@ mod tests {
     #[test]
     fn bevy_app_shell_can_be_built() {
         let _app = build_app();
+    }
+
+    #[test]
+    fn module_smoke_game_modules_are_addressable() {
+        #[allow(unused_imports)]
+        use crate::{diagnostics, objects, player, states, ui, world};
     }
 }

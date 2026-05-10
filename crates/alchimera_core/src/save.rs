@@ -1,0 +1,1 @@
+//! Save domain skeletons.
