@@ -1,0 +1,1 @@
+//! Game object runtime skeletons.

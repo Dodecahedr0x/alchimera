@@ -1,0 +1,1 @@
+//! Identifier domain skeletons.
