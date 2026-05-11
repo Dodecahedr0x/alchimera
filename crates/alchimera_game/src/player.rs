@@ -1,7 +1,8 @@
 //! Player runtime skeletons.
 
 use bevy::prelude::{
-    App, Commands, Component, Entity, Event, EventReader, Plugin, Startup, Transform, Update, Vec3,
+    App, Camera3d, Commands, Component, Entity, Event, EventReader, Plugin, Startup, Transform,
+    Update, Vec3,
 };
 
 /// Marker component for the controllable player entity.
@@ -87,7 +88,8 @@ fn spawn_player(mut commands: Commands) {
         .id();
     commands.spawn((
         PlayerCamera { player },
-        Transform::from_translation(PlayerCamera::DEFAULT_OFFSET),
+        Camera3d::default(),
+        Transform::from_translation(PlayerCamera::DEFAULT_OFFSET).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 }
 

@@ -5,7 +5,7 @@ use bevy::prelude::{App, MinimalPlugins};
 use crate::{
     diagnostics::DiagnosticsPlugin, harvesting::HarvestingPlugin, interaction::InteractionPlugin,
     inventory_ui::InventoryUiPlugin, player::PlayerPlugin, states::GameStatePlugin,
-    streaming::ChunkStreamingPlugin,
+    streaming::ChunkStreamingPlugin, terrain_rendering::TerrainRenderingPlugin,
 };
 
 pub mod diagnostics;
@@ -36,6 +36,7 @@ pub fn build_app() -> App {
         HarvestingPlugin,
         InventoryUiPlugin,
         PlayerPlugin,
+        TerrainRenderingPlugin,
         ChunkStreamingPlugin,
     ));
     app
