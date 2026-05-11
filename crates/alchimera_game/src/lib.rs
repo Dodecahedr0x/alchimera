@@ -17,6 +17,7 @@ pub mod input;
 pub mod interaction;
 pub mod inventory_ui;
 pub mod objects;
+pub mod persistence;
 pub mod player;
 pub mod states;
 pub mod streaming;
@@ -85,7 +86,7 @@ mod tests {
         #[allow(unused_imports)]
         use crate::{
             building, crafting, diagnostics, harvesting, input, interaction, inventory_ui, objects,
-            player, states, streaming, terrain_rendering, ui, world,
+            persistence, player, states, streaming, terrain_rendering, ui, world,
         };
     }
 }

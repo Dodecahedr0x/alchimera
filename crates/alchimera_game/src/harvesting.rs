@@ -46,6 +46,11 @@ impl PlayerInventory {
     pub fn item_stacks(&self) -> impl Iterator<Item = &alchimera_core::inventory::ItemStack> {
         self.inventory.slots().iter().filter_map(Option::as_ref)
     }
+
+    #[must_use]
+    pub fn slot_count(&self) -> usize {
+        self.inventory.slots().len()
+    }
 }
 
 impl Default for PlayerInventory {
@@ -66,10 +71,18 @@ impl ChunkModificationLogs {
         self.logs.get(&chunk)
     }
 
-    fn log_for_mut(&mut self, chunk: ChunkCoord) -> &mut ChunkModificationLog {
+    pub fn log_for_mut(&mut self, chunk: ChunkCoord) -> &mut ChunkModificationLog {
         self.logs
             .entry(chunk)
             .or_insert_with(|| ChunkModificationLog::new(chunk))
+    }
+
+    pub fn insert_log(&mut self, log: ChunkModificationLog) {
+        self.logs.insert(log.chunk(), log);
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &ChunkModificationLog> {
+        self.logs.values()
     }
 }
 
