@@ -50,3 +50,7 @@ harness = false
 [[bench]]
 name = "object_placement"
 harness = false
+
+[[bench]]
+name = "chunk_generation"
+harness = false
