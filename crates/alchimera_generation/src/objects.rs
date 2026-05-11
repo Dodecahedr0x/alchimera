@@ -1,12 +1,135 @@
 //! Deterministic procedural game-object generation and lifecycle primitives.
 
-use alchimera_core::{ids::ObjectId, seed::WorldSeed};
+use std::{error::Error, fmt};
+
+use alchimera_core::{
+    ids::{IdError, MaterialId, ObjectId, PrototypeId},
+    seed::WorldSeed,
+};
+use serde::Deserialize;
 
 use crate::{
     biome::{sample_biome, Biome},
     chunk::{ChunkCoord, CHUNK_SIZE_METERS},
     terrain::{sample_height, TerrainConfig},
 };
+
+/// Generator family used to build concrete object data from a prototype.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Default)]
+pub enum ObjectPrototypeGenerator {
+    #[default]
+    Unknown,
+    Tree,
+    Rock,
+    Herb,
+}
+
+/// Data-driven object prototype definition loaded from asset files.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ObjectPrototypeDefinition {
+    id: PrototypeId,
+    display_name: String,
+    generator: ObjectPrototypeGenerator,
+    material_refs: Vec<MaterialId>,
+}
+
+impl ObjectPrototypeDefinition {
+    /// Creates and validates an object prototype definition.
+    pub fn new(
+        id: impl Into<String>,
+        display_name: impl Into<String>,
+        generator: ObjectPrototypeGenerator,
+        material_refs: impl IntoIterator<Item = impl Into<String>>,
+    ) -> Result<Self, ObjectPrototypeDefinitionError> {
+        let material_refs = material_refs
+            .into_iter()
+            .map(|material_ref| {
+                MaterialId::new(material_ref.into())
+                    .map_err(ObjectPrototypeDefinitionError::InvalidMaterialId)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        if material_refs.is_empty() {
+            return Err(ObjectPrototypeDefinitionError::MissingMaterialReference);
+        }
+
+        Ok(Self {
+            id: PrototypeId::new(id).map_err(ObjectPrototypeDefinitionError::InvalidPrototypeId)?,
+            display_name: display_name.into(),
+            generator,
+            material_refs,
+        })
+    }
+
+    #[must_use]
+    pub const fn id(&self) -> &PrototypeId {
+        &self.id
+    }
+
+    #[must_use]
+    pub fn display_name(&self) -> &str {
+        &self.display_name
+    }
+
+    #[must_use]
+    pub const fn generator(&self) -> ObjectPrototypeGenerator {
+        self.generator
+    }
+
+    #[must_use]
+    pub fn material_refs(&self) -> &[MaterialId] {
+        &self.material_refs
+    }
+}
+
+/// Loads and validates an object prototype definition from RON asset text.
+pub fn load_object_prototype_ron(
+    source: &str,
+) -> Result<ObjectPrototypeDefinition, ObjectPrototypeDefinitionError> {
+    let raw: RawObjectPrototype =
+        ron::from_str(source).map_err(ObjectPrototypeDefinitionError::Parse)?;
+    if raw.generator == ObjectPrototypeGenerator::Unknown {
+        return Err(ObjectPrototypeDefinitionError::MissingGenerator);
+    }
+
+    ObjectPrototypeDefinition::new(raw.id, raw.display_name, raw.generator, raw.material_refs)
+}
+
+#[derive(Debug, Deserialize)]
+struct RawObjectPrototype {
+    id: String,
+    display_name: String,
+    #[serde(default)]
+    generator: ObjectPrototypeGenerator,
+    #[serde(default)]
+    material_refs: Vec<String>,
+}
+
+/// Validation and parse failures for data-driven object prototype definitions.
+#[derive(Debug)]
+pub enum ObjectPrototypeDefinitionError {
+    Parse(ron::error::SpannedError),
+    InvalidPrototypeId(IdError),
+    InvalidMaterialId(IdError),
+    MissingGenerator,
+    MissingMaterialReference,
+}
+
+impl fmt::Display for ObjectPrototypeDefinitionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Parse(error) => write!(f, "failed to parse object prototype: {error}"),
+            Self::InvalidPrototypeId(error) => write!(f, "invalid prototype id: {error}"),
+            Self::InvalidMaterialId(error) => write!(f, "invalid material reference: {error}"),
+            Self::MissingGenerator => write!(f, "object prototype must declare a generator"),
+            Self::MissingMaterialReference => {
+                write!(f, "object prototype must reference at least one material")
+            }
+        }
+    }
+}
+
+impl Error for ObjectPrototypeDefinitionError {}
 
 /// Stable prototype key for a procedurally generated object archetype.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -36,6 +159,33 @@ pub struct ObjectPrototype {
     pub ascii_icon: &'static str,
     pub spawn_weight: u32,
     allowed_biomes: &'static [Biome],
+}
+
+/// Stable visual render output owned by object definitions.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ObjectVisualRender {
+    pub key: &'static str,
+    pub card: String,
+}
+
+/// Rendering contract for procedural object definitions.
+pub trait ObjectRenderable {
+    fn render_visual(&self) -> ObjectVisualRender;
+}
+
+impl ObjectRenderable for ObjectPrototype {
+    fn render_visual(&self) -> ObjectVisualRender {
+        let key = self.key.as_str();
+        let card = format!(
+            "┌─ {name} ({key}) ─┐\nkey: {key}\nname: {name}\nspawn_weight: {weight}\nvisual:\n{icon}\n└────────────────────┘\n",
+            name = self.display_name,
+            key = key,
+            weight = self.spawn_weight,
+            icon = self.ascii_icon
+        );
+
+        ObjectVisualRender { key, card }
+    }
 }
 
 /// Returns every object archetype that procedural generation and visualization know about.
