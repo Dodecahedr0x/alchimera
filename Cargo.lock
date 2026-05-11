@@ -59,6 +59,7 @@ dependencies = [
  "alchimera_core",
  "ron",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
