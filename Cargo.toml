@@ -4,6 +4,7 @@ members = [
     "crates/alchimera_core",
     "crates/alchimera_generation",
     "crates/alchimera_game",
+    "crates/alchimera_object_viewer",
 ]
 resolver = "2"
 
@@ -16,6 +17,7 @@ repository = "https://example.invalid/alchimera"
 alchimera_core = { path = "crates/alchimera_core" }
 alchimera_generation = { path = "crates/alchimera_generation" }
 alchimera_game = { path = "crates/alchimera_game" }
+alchimera_object_viewer = { path = "crates/alchimera_object_viewer" }
 bevy = { version = "0.15", default-features = false }
 
 [package]
