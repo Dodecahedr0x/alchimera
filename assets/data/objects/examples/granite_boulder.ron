@@ -1,0 +1,6 @@
+(
+    id: "objects/granite_boulder",
+    display_name: "Granite Boulder",
+    generator: Rock,
+    material_refs: ["materials/granite"],
+)
