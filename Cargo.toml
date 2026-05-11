@@ -46,3 +46,7 @@ harness = false
 [[bench]]
 name = "rock_generator"
 harness = false
+
+[[bench]]
+name = "object_placement"
+harness = false

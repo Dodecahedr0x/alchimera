@@ -289,6 +289,7 @@ pub struct GeneratedObject {
     local_x: f32,
     local_z: f32,
     transform: ObjectTransform,
+    slope_height_delta: f32,
     lifecycle_state: LifecycleState,
 }
 
@@ -306,6 +307,11 @@ impl GeneratedObject {
     #[must_use]
     pub const fn transform(&self) -> ObjectTransform {
         self.transform
+    }
+
+    #[must_use]
+    pub const fn slope_height_delta(&self) -> f32 {
+        self.slope_height_delta
     }
 }
 
@@ -327,19 +333,73 @@ impl ProceduralGameObject for GeneratedObject {
     }
 }
 
+/// Placement controls for deterministic object generation.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ObjectPlacementConfig {
+    max_slope_height_delta: f32,
+    slope_sample_radius_meters: f32,
+}
+
+impl ObjectPlacementConfig {
+    #[must_use]
+    pub const fn new(max_slope_height_delta: f32, slope_sample_radius_meters: f32) -> Self {
+        Self {
+            max_slope_height_delta,
+            slope_sample_radius_meters,
+        }
+    }
+
+    #[must_use]
+    pub const fn max_slope_height_delta(self) -> f32 {
+        self.max_slope_height_delta
+    }
+
+    #[must_use]
+    pub const fn slope_sample_radius_meters(self) -> f32 {
+        self.slope_sample_radius_meters
+    }
+
+    #[must_use]
+    pub const fn with_max_slope_height_delta(mut self, max_slope_height_delta: f32) -> Self {
+        self.max_slope_height_delta = max_slope_height_delta;
+        self
+    }
+}
+
+impl Default for ObjectPlacementConfig {
+    fn default() -> Self {
+        Self::new(3.0, 1.0)
+    }
+}
+
 /// Stateless deterministic object generator.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ObjectGenerator {
     objects_per_chunk: u64,
     terrain_config: TerrainConfig,
+    placement_config: ObjectPlacementConfig,
 }
 
 impl ObjectGenerator {
     #[must_use]
     pub const fn new(objects_per_chunk: u64, terrain_config: TerrainConfig) -> Self {
+        Self::with_placement_config(
+            objects_per_chunk,
+            terrain_config,
+            ObjectPlacementConfig::new(3.0, 1.0),
+        )
+    }
+
+    #[must_use]
+    pub const fn with_placement_config(
+        objects_per_chunk: u64,
+        terrain_config: TerrainConfig,
+        placement_config: ObjectPlacementConfig,
+    ) -> Self {
         Self {
             objects_per_chunk,
             terrain_config,
+            placement_config,
         }
     }
 
@@ -347,20 +407,36 @@ impl ObjectGenerator {
     #[must_use]
     pub fn generate_chunk(self, seed: WorldSeed, chunk: ChunkCoord) -> Vec<GeneratedObject> {
         (0..self.objects_per_chunk)
-            .map(|index| self.generate_object(seed, chunk, index))
+            .filter_map(|index| self.generate_object(seed, chunk, index))
             .collect()
     }
 
-    fn generate_object(self, seed: WorldSeed, chunk: ChunkCoord, index: u64) -> GeneratedObject {
+    fn generate_object(
+        self,
+        seed: WorldSeed,
+        chunk: ChunkCoord,
+        index: u64,
+    ) -> Option<GeneratedObject> {
         let instance_seed = seed.derive_child("object.instance", &[chunk.x, chunk.z], index);
         let local_x = unit(instance_seed, "object.local_x") * CHUNK_SIZE_METERS;
         let local_z = unit(instance_seed, "object.local_z") * CHUNK_SIZE_METERS;
         let biome = sample_biome(seed, chunk, local_x, local_z);
         let prototype = choose_prototype(instance_seed, biome);
         let height = sample_height(seed, chunk, local_x, local_z, self.terrain_config);
+        let slope_height_delta = slope_height_delta(
+            seed,
+            chunk,
+            local_x,
+            local_z,
+            self.terrain_config,
+            self.placement_config.slope_sample_radius_meters,
+        );
+        if slope_height_delta > self.placement_config.max_slope_height_delta {
+            return None;
+        }
         let bounds = chunk.world_bounds();
 
-        GeneratedObject {
+        Some(GeneratedObject {
             id: ObjectId::from_seed_chunk_and_index(seed, [chunk.x, chunk.z], index),
             prototype_key: prototype.key,
             chunk,
@@ -371,8 +447,9 @@ impl ObjectGenerator {
                 yaw_radians: unit(instance_seed, "object.yaw") * std::f32::consts::TAU,
                 scale: 0.75 + unit(instance_seed, "object.scale") * 0.75,
             },
+            slope_height_delta,
             lifecycle_state: LifecycleState::Procedural,
-        }
+        })
     }
 }
 
@@ -401,6 +478,29 @@ fn choose_prototype(seed: WorldSeed, biome: Biome) -> &'static ObjectPrototype {
     }
 
     &object_catalog()[0]
+}
+
+fn slope_height_delta(
+    seed: WorldSeed,
+    chunk: ChunkCoord,
+    local_x: f32,
+    local_z: f32,
+    terrain_config: TerrainConfig,
+    radius: f32,
+) -> f32 {
+    let min_x = (local_x - radius).clamp(0.0, CHUNK_SIZE_METERS);
+    let max_x = (local_x + radius).clamp(0.0, CHUNK_SIZE_METERS);
+    let min_z = (local_z - radius).clamp(0.0, CHUNK_SIZE_METERS);
+    let max_z = (local_z + radius).clamp(0.0, CHUNK_SIZE_METERS);
+    let samples = [
+        sample_height(seed, chunk, min_x, min_z, terrain_config),
+        sample_height(seed, chunk, min_x, max_z, terrain_config),
+        sample_height(seed, chunk, max_x, min_z, terrain_config),
+        sample_height(seed, chunk, max_x, max_z, terrain_config),
+    ];
+    let min_height = samples.iter().copied().fold(f32::INFINITY, f32::min);
+    let max_height = samples.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+    max_height - min_height
 }
 
 fn unit(seed: WorldSeed, label: &str) -> f32 {
