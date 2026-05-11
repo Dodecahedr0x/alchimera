@@ -5,6 +5,7 @@ pub mod chunk;
 pub mod mesh;
 pub mod modification_log;
 pub mod objects;
+pub mod rock;
 pub mod terrain;
 pub mod tree;
 
@@ -34,6 +35,6 @@ mod tests {
     #[test]
     fn module_smoke_generation_modules_are_addressable() {
         #[allow(unused_imports)]
-        use crate::{biome, chunk, mesh, modification_log, objects, terrain, tree};
+        use crate::{biome, chunk, mesh, modification_log, objects, rock, terrain, tree};
     }
 }
