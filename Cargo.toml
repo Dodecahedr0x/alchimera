@@ -42,3 +42,7 @@ harness = false
 [[bench]]
 name = "tree_generator"
 harness = false
+
+[[bench]]
+name = "rock_generator"
+harness = false
