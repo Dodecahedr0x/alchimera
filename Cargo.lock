@@ -29,7 +29,9 @@ dependencies = [
 name = "alchimera"
 version = "0.1.0"
 dependencies = [
+ "alchimera_core",
  "alchimera_game",
+ "alchimera_generation",
  "criterion",
 ]
 

@@ -31,8 +31,14 @@ repository.workspace = true
 alchimera_game.workspace = true
 
 [dev-dependencies]
+alchimera_core.workspace = true
+alchimera_generation.workspace = true
 criterion = "0.5"
 
 [[bench]]
 name = "smoke"
+harness = false
+
+[[bench]]
+name = "tree_generator"
 harness = false

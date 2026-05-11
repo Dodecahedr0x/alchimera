@@ -6,6 +6,7 @@ pub mod mesh;
 pub mod modification_log;
 pub mod objects;
 pub mod terrain;
+pub mod tree;
 
 /// Stable crate identifier used by bootstrap smoke tests.
 pub const CRATE_NAME: &str = "alchimera_generation";
@@ -33,6 +34,6 @@ mod tests {
     #[test]
     fn module_smoke_generation_modules_are_addressable() {
         #[allow(unused_imports)]
-        use crate::{biome, chunk, mesh, modification_log, objects, terrain};
+        use crate::{biome, chunk, mesh, modification_log, objects, terrain, tree};
     }
 }
