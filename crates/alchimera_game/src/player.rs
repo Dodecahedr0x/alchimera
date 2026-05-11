@@ -1,7 +1,7 @@
 //! Player runtime skeletons.
 
 use bevy::prelude::{
-    App, Commands, Component, Event, EventReader, Plugin, Startup, Transform, Update, Vec3,
+    App, Commands, Component, Entity, Event, EventReader, Plugin, Startup, Transform, Update, Vec3,
 };
 
 /// Marker component for the controllable player entity.
@@ -44,6 +44,17 @@ impl Default for MovementIntent {
     }
 }
 
+/// Companion camera marker tied to a player entity.
+#[derive(Debug, Clone, Copy, PartialEq, Component)]
+pub struct PlayerCamera {
+    pub player: Entity,
+}
+
+impl PlayerCamera {
+    /// Default over-the-shoulder camera offset from the player.
+    pub const DEFAULT_OFFSET: Vec3 = Vec3::new(0.0, 2.0, 6.0);
+}
+
 /// Input event consumed by the player skeleton to update movement intent.
 #[derive(Debug, Clone, Copy, PartialEq, Event)]
 pub struct PlayerMovementInput {
@@ -66,11 +77,17 @@ impl Plugin for PlayerPlugin {
 }
 
 fn spawn_player(mut commands: Commands) {
+    let player = commands
+        .spawn((
+            Player,
+            PlayerStats::default(),
+            MovementIntent::default(),
+            Transform::default(),
+        ))
+        .id();
     commands.spawn((
-        Player,
-        PlayerStats::default(),
-        MovementIntent::default(),
-        Transform::default(),
+        PlayerCamera { player },
+        Transform::from_translation(PlayerCamera::DEFAULT_OFFSET),
     ));
 }
 

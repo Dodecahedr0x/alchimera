@@ -5,6 +5,7 @@ use bevy::prelude::{App, MinimalPlugins};
 use crate::{diagnostics::DiagnosticsPlugin, player::PlayerPlugin, states::GameStatePlugin};
 
 pub mod diagnostics;
+pub mod input;
 pub mod objects;
 pub mod player;
 pub mod states;
@@ -63,6 +64,6 @@ mod tests {
     #[test]
     fn module_smoke_game_modules_are_addressable() {
         #[allow(unused_imports)]
-        use crate::{diagnostics, objects, player, states, ui, world};
+        use crate::{diagnostics, input, objects, player, states, ui, world};
     }
 }
