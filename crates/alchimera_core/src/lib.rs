@@ -8,6 +8,7 @@ pub mod item;
 pub mod material;
 pub mod save;
 pub mod seed;
+pub mod validation;
 
 /// Stable crate identifier used by bootstrap smoke tests.
 pub const CRATE_NAME: &str = "alchimera_core";
