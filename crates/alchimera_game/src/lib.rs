@@ -9,6 +9,7 @@ pub mod input;
 pub mod objects;
 pub mod player;
 pub mod states;
+pub mod terrain_rendering;
 pub mod ui;
 pub mod world;
 
@@ -64,6 +65,6 @@ mod tests {
     #[test]
     fn module_smoke_game_modules_are_addressable() {
         #[allow(unused_imports)]
-        use crate::{diagnostics, input, objects, player, states, ui, world};
+        use crate::{diagnostics, input, objects, player, states, terrain_rendering, ui, world};
     }
 }

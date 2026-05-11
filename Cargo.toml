@@ -18,7 +18,7 @@ alchimera_core = { path = "crates/alchimera_core" }
 alchimera_generation = { path = "crates/alchimera_generation" }
 alchimera_game = { path = "crates/alchimera_game" }
 alchimera_object_viewer = { path = "crates/alchimera_object_viewer" }
-bevy = { version = "0.15", default-features = false, features = ["bevy_state"] }
+bevy = { version = "0.15", default-features = false, features = ["bevy_asset", "bevy_render", "bevy_state"] }
 
 [package]
 name = "alchimera"
