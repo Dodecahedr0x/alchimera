@@ -2,7 +2,7 @@
 
 use bevy::prelude::{App, MinimalPlugins};
 
-use crate::{diagnostics::DiagnosticsPlugin, states::GameStatePlugin};
+use crate::{diagnostics::DiagnosticsPlugin, player::PlayerPlugin, states::GameStatePlugin};
 
 pub mod diagnostics;
 pub mod objects;
@@ -18,7 +18,12 @@ pub const CRATE_NAME: &str = "alchimera_game";
 #[must_use]
 pub fn build_app() -> App {
     let mut app = App::new();
-    app.add_plugins((MinimalPlugins, GameStatePlugin, DiagnosticsPlugin));
+    app.add_plugins((
+        MinimalPlugins,
+        GameStatePlugin,
+        DiagnosticsPlugin,
+        PlayerPlugin,
+    ));
     app
 }
 
