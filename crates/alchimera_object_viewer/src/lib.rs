@@ -1,25 +1,15 @@
 //! Text visualizer for every procedural Alchimera game object archetype.
 
-use alchimera_generation::objects::object_catalog;
+use alchimera_generation::objects::{object_catalog, ObjectRenderable};
 
-/// Render all known procedural object archetypes in a stable text format.
+/// Render all known procedural object archetypes using the visual rendering owned by object definitions.
 #[must_use]
 pub fn render_all_objects() -> String {
     let mut output = String::from("Procedural Alchimera Objects\n============================\n");
 
     for prototype in object_catalog() {
         output.push('\n');
-        output.push_str("key: ");
-        output.push_str(prototype.key.as_str());
-        output.push('\n');
-        output.push_str("name: ");
-        output.push_str(prototype.display_name);
-        output.push('\n');
-        output.push_str("spawn_weight: ");
-        output.push_str(&prototype.spawn_weight.to_string());
-        output.push('\n');
-        output.push_str(prototype.ascii_icon);
-        output.push('\n');
+        output.push_str(&prototype.render_visual().card);
     }
 
     output

@@ -161,6 +161,33 @@ pub struct ObjectPrototype {
     allowed_biomes: &'static [Biome],
 }
 
+/// Stable visual render output owned by object definitions.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ObjectVisualRender {
+    pub key: &'static str,
+    pub card: String,
+}
+
+/// Rendering contract for procedural object definitions.
+pub trait ObjectRenderable {
+    fn render_visual(&self) -> ObjectVisualRender;
+}
+
+impl ObjectRenderable for ObjectPrototype {
+    fn render_visual(&self) -> ObjectVisualRender {
+        let key = self.key.as_str();
+        let card = format!(
+            "┌─ {name} ({key}) ─┐\nkey: {key}\nname: {name}\nspawn_weight: {weight}\nvisual:\n{icon}\n└────────────────────┘\n",
+            name = self.display_name,
+            key = key,
+            weight = self.spawn_weight,
+            icon = self.ascii_icon
+        );
+
+        ObjectVisualRender { key, card }
+    }
+}
+
 /// Returns every object archetype that procedural generation and visualization know about.
 #[must_use]
 pub const fn object_catalog() -> &'static [ObjectPrototype] {
