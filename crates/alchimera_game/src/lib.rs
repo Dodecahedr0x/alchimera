@@ -2,13 +2,17 @@
 
 use bevy::prelude::{App, MinimalPlugins};
 
-use crate::{diagnostics::DiagnosticsPlugin, player::PlayerPlugin, states::GameStatePlugin};
+use crate::{
+    diagnostics::DiagnosticsPlugin, player::PlayerPlugin, states::GameStatePlugin,
+    streaming::ChunkStreamingPlugin,
+};
 
 pub mod diagnostics;
 pub mod input;
 pub mod objects;
 pub mod player;
 pub mod states;
+pub mod streaming;
 pub mod terrain_rendering;
 pub mod ui;
 pub mod world;
@@ -25,6 +29,7 @@ pub fn build_app() -> App {
         GameStatePlugin,
         DiagnosticsPlugin,
         PlayerPlugin,
+        ChunkStreamingPlugin,
     ));
     app
 }
@@ -65,6 +70,8 @@ mod tests {
     #[test]
     fn module_smoke_game_modules_are_addressable() {
         #[allow(unused_imports)]
-        use crate::{diagnostics, input, objects, player, states, terrain_rendering, ui, world};
+        use crate::{
+            diagnostics, input, objects, player, states, streaming, terrain_rendering, ui, world,
+        };
     }
 }
