@@ -4,6 +4,8 @@ pub mod crafting;
 pub mod error;
 pub mod ids;
 pub mod inventory;
+pub mod item;
+pub mod material;
 pub mod save;
 pub mod seed;
 
@@ -22,6 +24,6 @@ mod tests {
     #[test]
     fn module_smoke_core_modules_are_addressable() {
         #[allow(unused_imports)]
-        use crate::{crafting, error, ids, inventory, save, seed};
+        use crate::{crafting, error, ids, inventory, item, material, save, seed};
     }
 }
