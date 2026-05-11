@@ -34,6 +34,18 @@ impl PlayerInventory {
             .add_items(item_id, quantity, stack_limit)
             .expect("harvestable stack limits must be valid")
     }
+
+    pub fn remove_items(
+        &mut self,
+        item_id: &ItemId,
+        quantity: u16,
+    ) -> Result<(), alchimera_core::inventory::InventoryError> {
+        self.inventory.remove_items(item_id, quantity)
+    }
+
+    pub fn item_stacks(&self) -> impl Iterator<Item = &alchimera_core::inventory::ItemStack> {
+        self.inventory.slots().iter().filter_map(Option::as_ref)
+    }
 }
 
 impl Default for PlayerInventory {
