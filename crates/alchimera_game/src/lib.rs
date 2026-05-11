@@ -4,13 +4,15 @@ use bevy::prelude::{App, MinimalPlugins};
 
 use crate::{
     diagnostics::DiagnosticsPlugin, harvesting::HarvestingPlugin, interaction::InteractionPlugin,
-    player::PlayerPlugin, states::GameStatePlugin, streaming::ChunkStreamingPlugin,
+    inventory_ui::InventoryUiPlugin, player::PlayerPlugin, states::GameStatePlugin,
+    streaming::ChunkStreamingPlugin,
 };
 
 pub mod diagnostics;
 pub mod harvesting;
 pub mod input;
 pub mod interaction;
+pub mod inventory_ui;
 pub mod objects;
 pub mod player;
 pub mod states;
@@ -32,6 +34,7 @@ pub fn build_app() -> App {
         DiagnosticsPlugin,
         InteractionPlugin,
         HarvestingPlugin,
+        InventoryUiPlugin,
         PlayerPlugin,
         ChunkStreamingPlugin,
     ));
@@ -75,8 +78,8 @@ mod tests {
     fn module_smoke_game_modules_are_addressable() {
         #[allow(unused_imports)]
         use crate::{
-            diagnostics, harvesting, input, interaction, objects, player, states, streaming,
-            terrain_rendering, ui, world,
+            diagnostics, harvesting, input, interaction, inventory_ui, objects, player, states,
+            streaming, terrain_rendering, ui, world,
         };
     }
 }
