@@ -1,5 +1,6 @@
 //! Core domain types and pure logic for Alchimera.
 
+pub mod alchemy;
 pub mod crafting;
 pub mod error;
 pub mod ids;
@@ -25,6 +26,6 @@ mod tests {
     #[test]
     fn module_smoke_core_modules_are_addressable() {
         #[allow(unused_imports)]
-        use crate::{crafting, error, ids, inventory, item, material, save, seed};
+        use crate::{alchemy, crafting, error, ids, inventory, item, material, save, seed};
     }
 }
