@@ -113,7 +113,7 @@ This review worktree is based on current `origin/main`. Historical task worktree
 1. Run `docs/playtests/2026-05-12-mvp-vertical-slice.md` from an interactive machine with a display and input.
 2. Record actual runtime FPS/frame-time and entity count in a follow-up profiling note.
 3. Investigate the Criterion-reported `build_minimal_bevy_app` regression if it reproduces in the next local benchmark run.
-4. Extend the new scripted non-windowed runtime metrics mode to simulate seeded player movement and streamed chunk traversal, so future cron jobs can collect richer runtime entity/frame data without manual play.
+4. The scripted non-windowed runtime metrics mode now simulates seeded player movement across chunk coordinates; future cron jobs can use it for richer runtime entity/frame regression data, but manual display/input play remains required for visual validation.
 
 ## Conclusion
 

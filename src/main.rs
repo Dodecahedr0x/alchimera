@@ -8,7 +8,7 @@ fn main() {
     match first_arg.as_str() {
         "--help" | "-h" => {
             println!(
-                "Alchimera\n\nUSAGE:\n    alchimera [OPTIONS]\n\nOPTIONS:\n    -h, --help                  Print help\n        --headless-metrics [N]  Run N headless update frames and print runtime metrics"
+                "Alchimera\n\nUSAGE:\n    alchimera [OPTIONS]\n\nOPTIONS:\n    -h, --help                  Print help\n        --headless-metrics [N]  Run N headless scripted traversal frames and print runtime metrics"
             );
         }
         "--headless-metrics" => {
@@ -16,9 +16,9 @@ fn main() {
                 .next()
                 .and_then(|value| value.parse::<u32>().ok())
                 .unwrap_or(60);
-            let report = alchimera_game::runtime_metrics::run_headless_metrics(frames);
+            let report = alchimera_game::runtime_metrics::run_headless_traversal_metrics(frames, 7);
             println!(
-                "headless_metrics frames={} elapsed_micros={} entity_count={} diagnostics_entity_count={} fps={:?} frame_time_ms={:?} active_chunks={} queued_chunks={}",
+                "headless_metrics frames={} elapsed_micros={} entity_count={} diagnostics_entity_count={} fps={:?} frame_time_ms={:?} active_chunks={} queued_chunks={} initial_player_chunk=({}, {}) final_player_chunk=({}, {}) unique_player_chunks={}",
                 report.frames,
                 report.elapsed_micros,
                 report.entity_count,
@@ -26,7 +26,12 @@ fn main() {
                 report.metrics.fps,
                 report.metrics.frame_time_ms,
                 report.metrics.active_chunks,
-                report.metrics.queued_chunks
+                report.metrics.queued_chunks,
+                report.initial_player_chunk.x,
+                report.initial_player_chunk.z,
+                report.final_player_chunk.x,
+                report.final_player_chunk.z,
+                report.unique_player_chunks
             );
         }
         _ => alchimera_game::run(),

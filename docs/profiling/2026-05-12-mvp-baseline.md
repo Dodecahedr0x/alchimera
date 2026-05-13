@@ -62,16 +62,16 @@ cargo run -- --headless-metrics 5
 Output:
 
 ```text
-headless_metrics frames=5 elapsed_micros=5281 entity_count=5 diagnostics_entity_count=5 fps=Some(4812) frame_time_ms=Some(0) active_chunks=0 queued_chunks=9
+headless_metrics frames=5 elapsed_micros=810 entity_count=5 diagnostics_entity_count=5 fps=Some(6433) frame_time_ms=Some(0) active_chunks=0 queued_chunks=9 initial_player_chunk=(0, 0) final_player_chunk=(-6, 0) unique_player_chunks=6
 ```
 
-This proves a bounded non-windowed metrics path works in cron and can sample Bevy diagnostics/resource state. It is **not** a replacement for a manual visual/GPU playtest because the app runs with `MinimalPlugins` and no interactive display/input session.
+This proves a bounded non-windowed scripted traversal path works in cron and can sample Bevy diagnostics/resource state while moving the player across chunk coordinates. It is **not** a replacement for a manual visual/GPU playtest because the app runs with `MinimalPlugins` and no interactive display/input session.
 
 Next visual measurement should still be done from an interactive machine/session with a display and the diagnostics overlay enabled.
 
 ## Entity count observed
 
-Headless scripted sample observed `entity_count=5` and `diagnostics_entity_count=5` after five bounded update frames. This is useful for cron regression checks, but the manual live world entity count remains pending because no interactive terrain traversal/playtest was performed.
+Headless scripted sample observed `entity_count=5` and `diagnostics_entity_count=5` after five bounded traversal frames. The scripted movement started in chunk `(0, 0)`, ended in chunk `(-6, 0)`, and visited six unique player chunks. This is useful for cron regression checks, but the manual live world entity count remains pending because no interactive terrain traversal/playtest was performed.
 
 ## Known bottlenecks / risks
 
@@ -89,4 +89,3 @@ Headless scripted sample observed `entity_count=5` and `diagnostics_entity_count
    - Seed and player path used.
 2. Extend runtime benchmarks for chunk streaming over multiple chunks rather than only one-chunk generator microbenchmarks.
 3. Investigate the `build_minimal_bevy_app` Criterion regression if it reproduces on the next local benchmark run.
-4. Extend `--headless-metrics` to simulate seeded player movement and streamed chunk traversal, then append its output to future baseline reports.
