@@ -12,6 +12,7 @@ Environment: scheduled headless cron run on Linux. Automated benchmark commands 
 cargo test --workspace --release
 cargo bench --workspace
 cargo run --release   # attempted under timeout in headless cron/worktree
+cargo run -- --headless-metrics 5
 ```
 
 Results:
@@ -19,6 +20,7 @@ Results:
 - `cargo test --workspace --release`: passed.
 - `cargo bench --workspace`: passed.
 - `cargo run --release`: attempted in the W5-T3 worktree with a timeout. The command was still compiling Bevy/runtime crates when the timeout expired, so no release runtime window/FPS observation was collected in this cron pass.
+- `cargo run -- --headless-metrics 5`: passed after adding the scripted headless metrics mode.
 
 ## Generation benchmark means
 
@@ -51,21 +53,29 @@ For this baseline, record the practical automated scope as:
 
 ## FPS / frame-time observed
 
-Not observed.
+Headless scripted sample collected with:
 
-Reason: the scheduled cron environment has no interactive display/input session. The release runtime command was attempted with a timeout but did not reach a usable observed window before timing out while compiling in the separate worktree.
+```bash
+cargo run -- --headless-metrics 5
+```
 
-Next measurement should be done from an interactive machine/session with a display and the diagnostics overlay enabled.
+Output:
+
+```text
+headless_metrics frames=5 elapsed_micros=5281 entity_count=5 diagnostics_entity_count=5 fps=Some(4812) frame_time_ms=Some(0) active_chunks=0 queued_chunks=9
+```
+
+This proves a bounded non-windowed metrics path works in cron and can sample Bevy diagnostics/resource state. It is **not** a replacement for a manual visual/GPU playtest because the app runs with `MinimalPlugins` and no interactive display/input session.
+
+Next visual measurement should still be done from an interactive machine/session with a display and the diagnostics overlay enabled.
 
 ## Entity count observed
 
-Not observed in a live runtime session for the same headless cron reason.
-
-Automated ECS tests verify terrain, camera/light, generated object, inventory, crafting, harvesting, building, persistence, and chunk-streaming state in isolation, but this report should not claim a live world entity count until a manual/interactive run records one.
+Headless scripted sample observed `entity_count=5` and `diagnostics_entity_count=5` after five bounded update frames. This is useful for cron regression checks, but the manual live world entity count remains pending because no interactive terrain traversal/playtest was performed.
 
 ## Known bottlenecks / risks
 
-- Runtime FPS and entity-count data are still missing; the automated suite validates behavior, not visual/runtime throughput.
+- Manual visual runtime FPS and live entity-count data are still missing; the scripted headless metrics path now gives cron a regression-checkable sample but does not exercise GPU/window/input throughput.
 - `build_minimal_bevy_app` benchmark regressed relative to local Criterion history and should be investigated if startup cost matters for the MVP.
 - Generation microbenchmarks are fast at one-chunk scope, but they do not yet measure sustained streaming over an active chunk radius while objects and gameplay systems are active.
 - Benchmark runs reported several outliers, especially object placement and app construction; future baselines should keep the same hardware/session and compare Criterion reports over time.
@@ -77,6 +87,6 @@ Automated ECS tests verify terrain, camera/light, generated object, inventory, c
    - Entity count.
    - Active chunk radius.
    - Seed and player path used.
-2. Add or extend runtime benchmarks for chunk streaming over multiple chunks rather than only one-chunk generator microbenchmarks.
+2. Extend runtime benchmarks for chunk streaming over multiple chunks rather than only one-chunk generator microbenchmarks.
 3. Investigate the `build_minimal_bevy_app` Criterion regression if it reproduces on the next local benchmark run.
-4. Add a repeatable scripted runtime smoke mode if possible so cron can gather non-visual runtime metrics without a windowed playtest.
+4. Extend `--headless-metrics` to simulate seeded player movement and streamed chunk traversal, then append its output to future baseline reports.
