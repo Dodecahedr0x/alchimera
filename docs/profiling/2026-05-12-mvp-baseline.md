@@ -34,13 +34,15 @@ From `cargo bench --workspace`:
 | `chunk_object_placement` | 8.5008 µs – 8.7059 µs |
 | `object_placement_one_chunk` | 8.3740 µs – 8.8040 µs |
 | `generate_rock_default` | 3.1565 µs – 3.3265 µs |
-| `build_minimal_bevy_app` | 222.81 µs – 238.64 µs |
+| `build_minimal_bevy_app` | 204.25 µs – 212.07 µs on the follow-up run |
+| `headless_chunk_streaming_traversal_16_frames` | 761.68 µs – 787.56 µs |
 | `generate_tree_default` | 1.4541 µs – 1.5143 µs |
 
 Criterion notes:
 
 - `Gnuplot not found`; Criterion used the plotters backend.
-- `build_minimal_bevy_app` reported a regression versus prior Criterion history: `+80.818% +86.448% +92.440%`.
+- `build_minimal_bevy_app` reported a regression versus prior Criterion history in the initial baseline: `+80.818% +86.448% +92.440%`.
+- A follow-up local benchmark run after adding the scripted traversal benchmark reported `build_minimal_bevy_app` improved versus the prior sample: `-12.600% -9.9231% -7.2797%`, so the earlier regression did not reproduce in this cron environment.
 
 ## Active chunk radius tested
 
@@ -49,6 +51,7 @@ Automated benchmarks exercise one generated chunk or a minimal app setup, depend
 For this baseline, record the practical automated scope as:
 
 - Generation microbenchmarks: one chunk / one generator invocation.
+- Runtime chunk-streaming benchmark: 16 deterministic scripted traversal frames across multiple player chunks via `headless_chunk_streaming_traversal_16_frames`.
 - Runtime visual play session: not observed in headless cron.
 
 ## FPS / frame-time observed
@@ -76,8 +79,8 @@ Headless scripted sample observed `entity_count=5` and `diagnostics_entity_count
 ## Known bottlenecks / risks
 
 - Manual visual runtime FPS and live entity-count data are still missing; the scripted headless metrics path now gives cron a regression-checkable sample but does not exercise GPU/window/input throughput.
-- `build_minimal_bevy_app` benchmark regressed relative to local Criterion history and should be investigated if startup cost matters for the MVP.
-- Generation microbenchmarks are fast at one-chunk scope, but they do not yet measure sustained streaming over an active chunk radius while objects and gameplay systems are active.
+- The follow-up Criterion run did not reproduce the earlier `build_minimal_bevy_app` regression; the benchmark improved versus the prior local Criterion sample in this cron environment.
+- Generation microbenchmarks are fast at one-chunk scope, and the runtime smoke benchmark now samples multi-chunk scripted traversal; future baselines should still compare the same hardware/session over time.
 - Benchmark runs reported several outliers, especially object placement and app construction; future baselines should keep the same hardware/session and compare Criterion reports over time.
 
 ## Next performance tasks
@@ -87,5 +90,5 @@ Headless scripted sample observed `entity_count=5` and `diagnostics_entity_count
    - Entity count.
    - Active chunk radius.
    - Seed and player path used.
-2. Extend runtime benchmarks for chunk streaming over multiple chunks rather than only one-chunk generator microbenchmarks.
-3. Investigate the `build_minimal_bevy_app` Criterion regression if it reproduces on the next local benchmark run.
+2. Keep the scripted runtime chunk-streaming benchmark in future baselines and compare it on the same hardware/session over time.
+3. Re-check `build_minimal_bevy_app` only if a future benchmark run reproduces the earlier regression.
